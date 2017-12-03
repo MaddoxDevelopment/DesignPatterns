@@ -25,6 +25,8 @@ namespace DesignPatterns.ObserverPattern
                 var method = pair.Value;
                 var parameter = method.GetParameters()
                     .Select(w => w.ParameterType).FirstOrDefault();
+                if(parameter == null)
+                    continue;
                 if (!temp.ContainsKey(parameter))
                     temp.Add(parameter, new List<KeyValuePair<string, MethodInfo>>(new[] {pair}));
                 else
