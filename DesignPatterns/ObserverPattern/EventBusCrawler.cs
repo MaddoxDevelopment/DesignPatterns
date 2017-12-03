@@ -2,11 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DesignPatterns.ObserverPattern.impl;
 
 namespace DesignPatterns.ObserverPattern
 {
     public class EventBusCrawler
     {
+        /// <summary>
+        /// Take all the listening methods, and add it to a dictionary with the
+        /// parameter as the key.
+        /// 
+        /// When an object is passed in to dispatch, we can easily lookup
+        /// which methods are expecting that type, by the dictionary key.
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<Type, IList<KeyValuePair<string, MethodInfo>>> BuildListeners()
         {
             var listening = GetListeningMethods();
@@ -24,6 +33,16 @@ namespace DesignPatterns.ObserverPattern
             return temp;
         }
         
+        /// <summary>
+        /// Find all methods in the current assembly that have a method
+        /// with one parameter, and have the event subscriber attribute.
+        /// 
+        /// We must return a list of key value pairs because we need the full name
+        /// of the calling class to invoke the method later on with the actual class instance.
+        /// 
+        /// This method is heavy and should only be called at the startup of the EventBus.
+        /// </summary>
+        /// <returns></returns>
         private IEnumerable<KeyValuePair<string, MethodInfo>> GetListeningMethods()
         {
             var temp = new HashSet<KeyValuePair<string, MethodInfo>>();
@@ -32,6 +51,8 @@ namespace DesignPatterns.ObserverPattern
             {
                 foreach (var method in type.GetMethods())
                 {
+                    if(method.GetCustomAttribute<EventSubscriber>() == null)
+                        continue;
                     if(method.GetParameters().Length != 1)
                         continue;
                     temp.Add(new KeyValuePair<string, MethodInfo>(type.FullName, method));
